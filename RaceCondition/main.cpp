@@ -46,13 +46,34 @@ void Pause()
 // Arguments:
 //   threadData - Pointer to per-thread data for this thread.
 ///////////////////////////////////////////////////////////////////////////////////
-void ThreadEntryPoint(ThreadStruct *threadData)
+
+// added argc4 to represent run type from
+// argc[4]{CL:RaceCondition.exe |XX| |XX| |XX| |Runtype|}
+
+void ThreadEntryPoint(ThreadStruct *threadData, int argc4)
 {
 	///////////////////////////////////////////////////////////////////////////////////
 	// TODO: Add code to this function to make it run according to the run type.
 	//		 However do NOT duplicate the following code.
 	///////////////////////////////////////////////////////////////////////////////////	
 
+	//Switch will choose runtype
+	switch (argc4)
+	{
+	case 0:
+
+		break;
+	case 1:
+
+		break;
+	case 2:
+
+		break;
+	case 3:
+
+		break;
+
+	}
 	for(int i = 0; i < threadData->numberOfStringsToGenerate; i++, std::this_thread::sleep_for(std::chrono::milliseconds(10)))
 	{
 		for(int j = 0; j < threadData->sharedStringLength; j++)
@@ -101,11 +122,12 @@ int main(int argc, char** argv)
 		Pause();
 		return 1;
 	}
-
-
+	//pulls arguments from command line
+	//{CL: 0|xx.exe|1|threadCount|2|sharedStringLength|3|numberOfStringsToGenerate|4|runtype|}
 	threadCount = atoi(argv[1]);
 	sharedStringLength = atoi(argv[2]);
 	numberOfStringsToGenerate = atoi(argv[3]);
+	runType = atoi(argv[4]);
 	//
 
 	if(threadCount < 0 || sharedStringLength < 0 || numberOfStringsToGenerate < 0 || runType < 0)
