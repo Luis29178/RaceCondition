@@ -10,7 +10,9 @@
 #else
 	#define ENABLE_LEAK_DETECTION()
 #endif
-
+#include <cstdio>
+#include <cstdlib>
+#include <thread>
 
 struct ThreadStruct
 {
