@@ -13,6 +13,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <thread>
+#include <vector>
 
 struct ThreadStruct
 {
@@ -148,7 +149,7 @@ int main(int argc, char** argv)
 	// TODO:: You will need a container to store the thread class objects. It is up to you
 	//   to decide how you want to store the threads.
 	///////////////////////////////////////////////////////////////////////////////////	
-
+	
 	// NOTE: Do NOT change this for loop header
 	for (int i = threadCount - 1; i >= 0; i--)
 	{
