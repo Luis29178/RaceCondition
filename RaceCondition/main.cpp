@@ -14,6 +14,8 @@
 #include <cstdlib>
 #include <thread>
 #include <vector>
+#include <thread>
+#include <map>
 
 struct ThreadStruct
 {
@@ -29,7 +31,7 @@ struct ThreadStruct
 	///////////////////////////////////////////////////////////////////////////////////
 	// TODO: Add any extra variables needed by the threads here
 	///////////////////////////////////////////////////////////////////////////////////	
-
+	int runtype;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -48,18 +50,23 @@ void Pause()
 //   threadData - Pointer to per-thread data for this thread.
 ///////////////////////////////////////////////////////////////////////////////////
 
-// added argc4 to represent run type from
-// argc[4]{CL:RaceCondition.exe |XX| |XX| |XX| |Runtype|}
-
-void ThreadEntryPoint(ThreadStruct *threadData, int argc4)
+void ThreadEntryPoint(ThreadStruct *threadData)
 {
 	///////////////////////////////////////////////////////////////////////////////////
 	// TODO: Add code to this function to make it run according to the run type.
 	//		 However do NOT duplicate the following code.
 	///////////////////////////////////////////////////////////////////////////////////	
-
+	for (int i = 0; i < threadData->numberOfStringsToGenerate; i++, std::this_thread::sleep_for(std::chrono::milliseconds(10)))
+	{
+		for (int j = 0; j < threadData->sharedStringLength; j++)
+		{
+			std::this_thread::sleep_for(std::chrono::milliseconds(1));
+			threadData->sharedString[j] = 'A' + threadData->id;
+		}
+		printf("Thread %d: %s\n", threadData->id, threadData->sharedString);
+	}
 	//Switch will choose runtype
-	switch (argc4)
+	switch (threadData->runtype)
 	{
 	case 0:
 
@@ -75,18 +82,11 @@ void ThreadEntryPoint(ThreadStruct *threadData, int argc4)
 		break;
 
 	}
-	for(int i = 0; i < threadData->numberOfStringsToGenerate; i++, std::this_thread::sleep_for(std::chrono::milliseconds(10)))
-	{
-		for(int j = 0; j < threadData->sharedStringLength; j++)
-		{
-			std::this_thread::sleep_for(std::chrono::milliseconds(1));
-			threadData->sharedString[j] = 'A' + threadData->id;
-		}
-		printf("Thread %d: %s\n", threadData->id, threadData->sharedString);
-	}
+	
 
 	///////////////////////////////////////////////////////////////////////////////////
 }
+
 
 int main(int argc, char** argv)
 {
@@ -99,16 +99,6 @@ int main(int argc, char** argv)
 	char *sharedString = nullptr;
 	ThreadStruct *perThreadData = nullptr;
 
-	///////////////////////////////////////////////////////////////////////////////////
-	// TODO:: Handle the runType command line argument.
-	//
-	//		  The following code already handles the first 4 arguments by ignoring
-	//		  the first argument (which is just the name of the program) and reading
-	//		  in the next 3 (threadCount, sharedStringLength, and numberOfStringsToGenerate).
-	//
-	//		  You will need to add code to this section to read in the final command line
-	//		  argument (the runType). 
-	///////////////////////////////////////////////////////////////////////////////////	
 
 
 	if (argc != 5)
@@ -149,7 +139,7 @@ int main(int argc, char** argv)
 	// TODO:: You will need a container to store the thread class objects. It is up to you
 	//   to decide how you want to store the threads.
 	///////////////////////////////////////////////////////////////////////////////////	
-	
+	std::vector<std::thread> threadmap;
 	// NOTE: Do NOT change this for loop header
 	for (int i = threadCount - 1; i >= 0; i--)
 	{
@@ -157,11 +147,19 @@ int main(int argc, char** argv)
 		perThreadData[i].sharedStringLength = sharedStringLength;
 		perThreadData[i].numberOfStringsToGenerate = numberOfStringsToGenerate;
 		perThreadData[i].sharedString = sharedString;
-
+		
 		///////////////////////////////////////////////////////////////////////////////////
 		// TODO:: Setup any additional variables in perThreadData and start the threads.
 		//			MUST be done in this for loop.
 		///////////////////////////////////////////////////////////////////////////////////
+		perThreadData[i].runtype = runType;
+
+
+		//places perthreaddata [KEY] and worker [THREAD] into a threadmap 
+		std::thread worker(ThreadEntryPoint, perThreadData);
+		worker.join();
+		threadmap.push_back(move(worker));
+		
 	}
 
 
