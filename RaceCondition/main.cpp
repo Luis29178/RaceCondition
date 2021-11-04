@@ -140,6 +140,7 @@ int main(int argc, char** argv)
 	//   to decide how you want to store the threads.
 	///////////////////////////////////////////////////////////////////////////////////	
 	std::vector<std::thread> threadmap;
+
 	// NOTE: Do NOT change this for loop header
 	for (int i = threadCount - 1; i >= 0; i--)
 	{
@@ -156,9 +157,8 @@ int main(int argc, char** argv)
 
 
 		//places perthreaddata [KEY] and worker [THREAD] into a threadmap 
-		std::thread worker(ThreadEntryPoint, perThreadData);
-	
-		threadmap.push_back(move(worker));
+		
+		threadmap.push_back(std::thread(ThreadEntryPoint, perThreadData));
 		
 	}
 
@@ -168,13 +168,21 @@ int main(int argc, char** argv)
 	//   Joinable threads we must Join each one. Joining a thread will cause
 	//   the calling thread (main in this case) to block until the thread being
 	//   joined has completed executing.
-	///////////////////////////////////////////////////////////////////////////////////	
+	///////////////////////////////////////////////////////////////////////////////////
+
+
+	for (auto& thread : threadmap)
+	{
+		thread.join();
+	}
 
 	Pause();
 	
 	///////////////////////////////////////////////////////////////////////////////////
 	// TODO: Clean up
 	///////////////////////////////////////////////////////////////////////////////////
-		
+	delete perThreadData;
+	delete sharedString;
+
 	return 0;
 }
