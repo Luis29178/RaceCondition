@@ -54,13 +54,16 @@ void Pause()
 //   threadData - Pointer to per-thread data for this thread.
 ///////////////////////////////////////////////////////////////////////////////////
 
+std::mutex muThreadEntryPoint;
+int threadIDcounter = 0;
+
 void ThreadEntryPoint(ThreadStruct *threadData)
 {
 	///////////////////////////////////////////////////////////////////////////////////
 	// TODO: Add code to this function to make it run according to the run type.
 	//		 However do NOT duplicate the following code.
 	///////////////////////////////////////////////////////////////////////////////////	
-	for (int i = 0; i < threadData->numberOfStringsToGenerate; i++, std::this_thread::sleep_for(std::chrono::milliseconds(10)))
+	/*for (int i = 0; i < threadData->numberOfStringsToGenerate; i++, std::this_thread::sleep_for(std::chrono::milliseconds(10)))
 	{
 		for (int j = 0; j < threadData->sharedStringLength; j++)
 		{
@@ -68,20 +71,68 @@ void ThreadEntryPoint(ThreadStruct *threadData)
 			threadData->sharedString[j] = 'A' + threadData->id;
 		}
 		printf("Thread %d: %s\n", threadData->id, threadData->sharedString);
-	}
+	}*/
 	//Switch will choose runtype
+	
+
 	switch (threadData->runtype)
 	{
 	case 0:
 
+		for (int i = 0; i < threadData->numberOfStringsToGenerate; i++)
+		{
+			for (int j = 0; j < threadData->sharedStringLength; j++)
+			{
+				threadData->sharedString[j] = 'A' + threadData->id;
+			}
+			printf("Thread %d: %s\n", threadData->id, threadData->sharedString);
+		}
+
 		break;
 	case 1:
-
+		
+		for (int i = 0; i < threadData->numberOfStringsToGenerate; i++)
+		{
+			muThreadEntryPoint.lock();
+			for (int j = 0; j < threadData->sharedStringLength; j++)
+			{
+				threadData->sharedString[j] = 'A' + threadData->id;
+			}
+			printf("Thread %d: %s\n", threadData->id, threadData->sharedString);
+			muThreadEntryPoint.unlock();
+		}
+		
 		break;
 	case 2:
+		muThreadEntryPoint.lock();
+		for (int i = 0; i < threadData->numberOfStringsToGenerate; i++)
+		{
 
+			for (int j = 0; j < threadData->sharedStringLength; j++)
+			{
+				threadData->sharedString[j] = 'A' + threadData->id;
+			}
+			printf("Thread %d: %s\n", threadData->id, threadData->sharedString);
+		}
+		muThreadEntryPoint.unlock();
 		break;
 	case 3:
+		while (threadData->id != threadIDcounter)
+		{
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		}
+		muThreadEntryPoint.lock();
+
+		for (int i = 0; i < threadData->numberOfStringsToGenerate; i++)
+		{
+			for (int j = 0; j < threadData->sharedStringLength; j++)
+			{
+				threadData->sharedString[j] = 'A' + threadData->id;
+			}
+			printf("Thread %d: %s\n", threadData->id, threadData->sharedString);
+		}
+		threadIDcounter++;
+		muThreadEntryPoint.unlock();
 
 		break;
 
@@ -161,8 +212,8 @@ int main(int argc, char** argv)
 
 
 		//places perthreaddata [KEY] and worker [THREAD] into a threadmap 
-		
-		threadmap.push_back(std::thread(ThreadEntryPoint, perThreadData));
+		std::thread worker(ThreadEntryPoint, perThreadData);
+		threadmap.push_back(std::move(worker));
 		
 	}
 
