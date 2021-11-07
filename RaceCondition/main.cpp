@@ -212,7 +212,7 @@ int main(int argc, char** argv)
 
 
 		//places perthreaddata [KEY] and worker [THREAD] into a threadmap 
-		std::thread worker(ThreadEntryPoint, perThreadData);
+		std::thread worker(ThreadEntryPoint, &perThreadData[i]);
 		threadmap.push_back(std::move(worker));
 		
 	}
